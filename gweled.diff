@@ -1,0 +1,91 @@
+diff -ur --ignore-all-space gweled-0.9.1/data/gweled.ui Gweled-src/data/gweled.ui
+--- gweled-0.9.1/data/gweled.ui	2011-03-31 13:33:16.000000000 +0200
++++ Gweled-src/data/gweled.ui	2018-08-03 16:21:36.000000000 +0200
+@@ -6,6 +6,8 @@
+     <property name="title">Gweled</property>
+     <property name="resizable">False</property>
+     <property name="icon_name">gweled</property>
++    <property name="window_position">center</property>
++    <property name="gravity">center</property>
+     <accel-groups>
+       <group name="accelgroup1"/>
+     </accel-groups>
+diff -ur --ignore-all-space gweled-0.9.1/src/board_engine.c Gweled-src/src/board_engine.c
+--- gweled-0.9.1/src/board_engine.c	2011-03-31 13:33:16.000000000 +0200
++++ Gweled-src/src/board_engine.c	2018-08-18 14:51:59.000000000 +0200
+@@ -322,7 +322,7 @@
+     }
+     if (g_do_not_score == FALSE) {
+         gi_total_gems_removed += gi_gems_removed;
+-        //g_print("Score: %d Gems removed: %d\n", i_total_score, gi_gems_removed);
++		g_print("Score: %d Gems removed: %d\n", i_total_score, gi_gems_removed);
+ 		gi_score += i_total_score;
+         //display score
+ 		buffer = g_strdup_printf ("%d", i_total_score);
+@@ -797,13 +797,10 @@
+ 					score.plain = gi_score;
+ 					games_scores_set_category (highscores, "Normal");
+ 					hiscore_rank = games_scores_add_score (highscores, score);
+- 					if (show_hiscores (hiscore_rank, TRUE) == GTK_RESPONSE_REJECT)
+-                        gtk_main_quit ();
+-                    else {
++						// ## custom: high score window has been removed, game starts over if no more moves left
+                         sge_destroy_all_objects ();
+ 	                    gweled_draw_board ();
+ 	                    gweled_start_new_game ();
+-                    }
+ 					g_do_not_score = FALSE;
+ 					gi_state = _IDLE;
+ 				}
+@@ -1046,3 +1043,4 @@
+     gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (g_progress_bar), 0.0);
+     gtk_label_set_markup ((GtkLabel *) g_score_label, "<span weight=\"bold\">000000</span>");
+ }
++
+diff -ur --ignore-all-space gweled-0.9.1/src/main.c Gweled-src/src/main.c
+--- gweled-0.9.1/src/main.c	2011-03-31 13:33:16.000000000 +0200
++++ Gweled-src/src/main.c	2018-08-18 16:12:33.000000000 +0200
+@@ -384,6 +384,10 @@
+     }
+     g_pref_window = GTK_WIDGET (gtk_builder_get_object (gweled_xml, "preferencesDialog"));
+     g_main_window = GTK_WIDGET (gtk_builder_get_object (gweled_xml, "gweledApp"));
++
++	// ## custom: added to center window
++	gtk_window_set_position(g_main_window, GTK_WIN_POS_CENTER_ALWAYS);
++
+     g_score_window = GTK_WIDGET (gtk_builder_get_object (gweled_xml, "highscoresDialog"));
+     g_progress_bar = GTK_WIDGET (gtk_builder_get_object (gweled_xml, "bonusProgressbar"));
+     g_score_label = GTK_WIDGET (gtk_builder_get_object (gweled_xml, "scoreLabel"));
+@@ -411,8 +415,6 @@
+ 	gtk_window_set_resizable (GTK_WINDOW (g_main_window), FALSE);
+ 	gtk_widget_show (g_main_window);
+ 
+-    welcome_screen_visibility(TRUE);
+-
+     gtk_widget_set_size_request (g_drawing_area,
+                                  BOARD_WIDTH * prefs.tile_size,
+ 			                     BOARD_HEIGHT * prefs.tile_size);
+@@ -473,6 +475,17 @@
+ 
+ 	g_free(filename);
+ 
++	// ## custom - added to start endless game instantly ##
++	prefs.game_mode = ENDLESS_MODE;
++	welcome_screen_visibility(FALSE);
++
++	gweled_draw_board ();
++	gweled_start_new_game ();
++	respawn_board_engine_loop();
++	gtk_widget_set_sensitive(g_menu_pause, TRUE);
++
++	// ## end custom ##
++
+ 	gtk_main ();
+ 
+     sound_destroy();
+@@ -486,3 +499,5 @@
+ 	return 0;
+ }
+ 
++
++

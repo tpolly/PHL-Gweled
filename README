@@ -1,0 +1,6 @@
+# Patched version of Gweled to be used in user study.
+
+Original: https://launchpad.net/gweled/trunk/0.9.1
+Patch file containing changes: gweled.diff
+
+This version is already configured to compile under Debian Linux. You may need to reconfigure.

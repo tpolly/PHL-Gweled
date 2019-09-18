@@ -1,6 +1,4 @@
-# Patched version of Gweled to be used in user study.
+This repository contains software that was used in the study "Reevaluating Passive Haptic Learning of Morse Code" (https://doi.org/10.1145/3341163.3347714). In particular, this is a patched version of the game Gweled. The game was adapted to run indefinitely (restart if no moves left) and to output the score on stdout.
 
 Original: https://launchpad.net/gweled/trunk/0.9.1
 Patch file containing changes: gweled.diff
-
-This version is already configured to compile under Debian Linux. You may need to reconfigure.
